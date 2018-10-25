@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace capstone
+namespace Capstone
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            Console.ReadLine();
+            CLI cli = new CLI();
+            cli.Run();
         }
     }
 }
