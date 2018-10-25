@@ -18,14 +18,16 @@ namespace Capstone
 
             bool isDone = false;
 
-            do
+            while (!isDone)
             {
-                int inputInt = 0;
+                int parkChoice = 0;
 
-                while (inputInt < 1 || inputInt > parks.Count)
+                while (parkChoice < 1 || parkChoice > parks.Count)
                 {
-                    DisplayMainMenu();
+                    DisplayMainMenu(parks);
+
                     string input = Console.ReadLine();
+
                     if (input.ToLower() == "q")
                     {
                         return;
@@ -33,14 +35,14 @@ namespace Capstone
 
                     try
                     {
-                        inputInt = int.Parse(input);
+                        parkChoice = int.Parse(input);
                     }
-                    catch
+
+                    catch (Exception ex)
                     {
-
                     }
 
-                    if (inputInt < 1 || inputInt > parks.Count)
+                    if (parkChoice < 1 || parkChoice > parks.Count)
                     {
                         Console.WriteLine("Input a valid selection.");
                         Console.WriteLine();
@@ -53,30 +55,23 @@ namespace Capstone
                 {
                     for (int i = 0; i < parks.Count; i++)
                     {
-                        if (inputInt == i + 1)
+                        if (parkChoice == i + 1)
                         {
                             parkIndex = i;
                         }
                     }
                 }
-                catch(Exception ex)
-                {
 
+                catch (Exception ex)
+                {
                 }
 
-                //DisplayParkInfo(parks[parkIndex]);
                 ParkMenu(parks[parkIndex]);
-
-
             }
-            while (!isDone);
         }
 
-        public void DisplayMainMenu()
+        public void DisplayMainMenu(List<Park> parks)
         {
-            ParkSqlDAL parkSqlDAL = new ParkSqlDAL(connectionString);
-            List<Park> parks = parkSqlDAL.GetParks();
-
             for (int i = 0; i < parks.Count; i++)
             {
                 Console.WriteLine($"{i + 1})  {parks[i].Name}");
@@ -84,20 +79,6 @@ namespace Capstone
             Console.WriteLine("Q)  to QUIT");
             Console.WriteLine();
             Console.WriteLine("Please choose a park");
-        }
-
-        public void DisplayParkInfo(Park park)
-        {
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine(park.Name);
-            Console.WriteLine($"Location:           {park.Location}");
-            Console.WriteLine($"Established:        {park.EstablishDate}");
-            Console.WriteLine($"Area:               {park.Area} sq km");
-            Console.WriteLine($"Annual Visitors:   {park.Visitors.ToString("N")}");
-            Console.WriteLine();
-            Console.WriteLine(park.Description);
-            Console.WriteLine();
             Console.WriteLine();
         }
 
@@ -107,7 +88,7 @@ namespace Capstone
 
             CampgroundSqlDAL campgroundSqlDAL = new CampgroundSqlDAL(connectionString);
 
-            do
+            while (!isDone)
             {
                 DisplayParkInfo(park);
                 DisplayParkMenu();
@@ -119,11 +100,11 @@ namespace Capstone
                     case "1":
                         List<Campground> campgrounds = campgroundSqlDAL.GetCampgrounds(park);
                         DisplayCampgroundInfo(campgrounds);
-                        CampgroundsMenu(park);
+                        CampgroundMenu(park, campgrounds);
                         break;
 
                     case "2":
-                        
+
                         break;
 
                     case "3":
@@ -134,8 +115,21 @@ namespace Capstone
                         Console.WriteLine("Input a valid selection.");
                         break;
                 }
+            }
+        }
 
-            } while (!isDone);
+        public void DisplayParkInfo(Park park)
+        {
+            Console.WriteLine();
+            Console.WriteLine(park.Name);
+            Console.WriteLine($"Location:           {park.Location}");
+            Console.WriteLine($"Established:        {park.EstablishDate}");
+            Console.WriteLine($"Area:               {park.Area} sq km");
+            Console.WriteLine($"Annual Visitors:    {park.Visitors.ToString("N")}");
+            Console.WriteLine();
+            Console.WriteLine(park.Description);
+            Console.WriteLine();
+            Console.WriteLine();
         }
 
         public void DisplayParkMenu()
@@ -149,35 +143,35 @@ namespace Capstone
         public void DisplayCampgroundInfo(List<Campground> campgrounds)
         {
             Console.WriteLine();
-            Console.WriteLine($"     {"Name", -40}{ "Open", -10}{ "Close", -10}{"Daily Fee"}");
+            Console.WriteLine($"     {"Name",-40}{ "Open",-10}{ "Close",-10}{"Daily Fee"}");
+
             int menuOption = 1;
             foreach (Campground campground in campgrounds)
-            {         
+            {
                 Console.WriteLine($"{menuOption})   {campground.ToString()}");
                 menuOption++;
             }
+
             Console.WriteLine();
             Console.WriteLine();
         }
 
-        public void CampgroundsMenu(Park park)
+        public void CampgroundMenu(Park park, List<Campground> campgrounds)
         {
             bool isDone = false;
 
-            CampgroundSqlDAL campgroundSqlDAL = new CampgroundSqlDAL(connectionString);
-
-            do
+            while (!isDone)
             {
-                DisplayCampgroundsMenu();
+                DisplayCampgroundMenu();
 
                 string input = Console.ReadLine();
 
                 switch (input)
                 {
                     case "1":
-                        List<Campground> campgrounds = campgroundSqlDAL.GetCampgrounds(park);
-                        DisplayCampgroundInfo(campgrounds);
-                        CampgroundsMenu(park);
+                        Reservation reservation = SearchForReservation(park, campgrounds);
+                        List<Site> sites = CheckAvailability(reservation);
+                        Console.WriteLine(MakeReservation(sites));
                         break;
 
                     case "2":
@@ -188,15 +182,81 @@ namespace Capstone
                         Console.WriteLine("Input a valid selection.");
                         break;
                 }
-
-            } while (!isDone);
+            }
         }
 
-        public void DisplayCampgroundsMenu()
+        public void DisplayCampgroundMenu()
         {
             Console.WriteLine("1)  Search for Available Reservation");
             Console.WriteLine("2)  Return to previous screen");
             Console.WriteLine();
         }
+
+        public Reservation SearchForReservation(Park park, List<Campground> campgrounds)
+        {
+
+            Console.WriteLine();
+            Console.WriteLine("Which campground? Enter 0 to cancel");
+
+            int campgroundChoice = 0;
+
+            while (campgroundChoice < 1 || campgroundChoice > campgrounds.Count)
+            {
+                string input = Console.ReadLine();
+
+                try
+                {
+                    campgroundChoice = int.Parse(input);
+                }
+
+                catch (Exception ex)
+                {
+                }
+
+                if (campgroundChoice == 0)
+                {
+                    return null;
+                }
+
+                if (campgroundChoice < 0 || campgroundChoice > campgrounds.Count)
+                {
+                    Console.WriteLine("Input a valid selection.");
+                    DisplayCampgroundInfo(campgrounds);
+                }
+            }
+
+            Console.WriteLine("What is the arrival date? MM/DD/YYYY");
+
+            DateTime arrivalDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
+
+            Console.WriteLine("What is the departure date? MM/DD/YYYY");
+
+            DateTime departureDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
+
+            Reservation reservation = new Reservation();
+            reservation.FromDate = arrivalDate;
+            reservation.ToDate = departureDate;
+
+            return reservation;
+        }
+
+        public List<Site> CheckAvailability(Reservation reservation)
+        {
+            ReservationSqlDAL reservationSqlDAL = new ReservationSqlDAL(connectionString);
+            reservationSqlDAL.   (); // call method to search reservation table
+
+            List<Site> sites = new List<Site>();
+
+            return sites;
+        }
+
+        public string MakeReservation(List<Site> sites)
+        {
+            return "";
+            // ask for reservation
+            // add info to reservation object
+            // call method to add reservation to table
+        }
     }
 }
+

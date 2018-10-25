@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Capstone.Models
 {
-    class Reservation
+    public class Reservation
     {
 
     }
