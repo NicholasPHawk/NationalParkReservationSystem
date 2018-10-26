@@ -15,7 +15,8 @@ namespace Capstone.DAL
                                                    "AND s.site_id NOT IN " +
                                                             "(SELECT site_id from reservation " +
                                                             "WHERE @from_date < to_date " +
-                                                            "AND @to_date > from_date);";
+                                                            "AND @to_date > from_date) " +
+                                                   "ORDER BY s.site_id;";
 
         private string SQL_addReservation = "INSERT INTO reservation (site_id, name, from_date, to_date, create_date) " +
                                             "VALUES (@site_id, @name, @from_date, @to_date, @create_date);" +
