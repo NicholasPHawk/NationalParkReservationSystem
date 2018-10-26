@@ -96,21 +96,16 @@ namespace Capstone.CLI
             Console.WriteLine("Results Matching Your Search Criteria");
             Console.WriteLine();
 
-            Console.WriteLine($"{"Site No.",-10}{"Max Occup.",-10}{"Accessible",-10}" +
-                $"{"RV Length",-10}{"Utilities",-10}{"Cost"}");
+            Console.WriteLine($"{"Site No.",-10}{"Max Occup.",-15}{"Accessible",-15}" +
+                $"{"Max RV Length",-20}{"Utilities",-15}{"Cost"}");
 
             System.TimeSpan reservationLength = reservation.ToDate - reservation.FromDate;
 
-            int menuOption = 1;
-
-            while (menuOption < 5)
+            foreach (Site site in sites)
             {
-                foreach (Site site in sites)
-                {
-                    Console.WriteLine($"{menuOption})   {site.ToString()}{(cost * reservationLength.Days).ToString("C2")}");
-                    menuOption++;
-                }
+                Console.WriteLine($"{site.ToString()}{(cost * reservationLength.Days).ToString("C2")}");
             }
+
 
             Console.WriteLine();
         }
@@ -154,8 +149,6 @@ namespace Capstone.CLI
             Console.WriteLine();
 
             reservation.Name = Console.ReadLine();
-
-            reservation.CreateDate = DateTime.UtcNow;
         }
 
         public string AddReservation(Reservation reservation)
