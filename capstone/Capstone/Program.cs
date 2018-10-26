@@ -1,4 +1,5 @@
 ﻿using System;
+using Capstone.CLI;
 
 namespace Capstone
 {
@@ -6,8 +7,8 @@ namespace Capstone
     {
         public static void Main(string[] args)
         {
-            CLI cli = new CLI();
-            cli.Run();
+            MainCLI mainCLI = new MainCLI();
+            mainCLI.RunMainCLI();
         }
     }
 }

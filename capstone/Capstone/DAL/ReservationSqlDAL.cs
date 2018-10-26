@@ -9,7 +9,7 @@ namespace Capstone.DAL
     {
         private string connectionString;
 
-        public ReservationSqlDAL()
+        public ReservationSqlDAL(string connectionString)
         {
             this.connectionString = connectionString;
         }
