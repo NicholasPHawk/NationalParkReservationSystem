@@ -29,7 +29,7 @@ namespace Capstone.CLI
 
                     if (input.ToLower() == "q")
                     {
-                        return;
+                        isDone = true;
                     }
 
                     try

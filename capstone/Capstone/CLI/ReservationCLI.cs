@@ -26,6 +26,7 @@ namespace Capstone.CLI
             while (campgroundChoice < 1 || campgroundChoice > campgrounds.Count)
             {
                 campgroundCLI.DisplayCampgroundInfo(campgrounds);
+
                 Console.WriteLine("Which campground? Enter 0 to cancel");
                 Console.WriteLine();
 
@@ -54,30 +55,32 @@ namespace Capstone.CLI
                 }
             }
 
+            Reservation reservation = new Reservation();
+
             Console.WriteLine();
             Console.WriteLine("What is the arrival date? MM/DD/YYYY");
             Console.WriteLine();
 
-            DateTime arrivalDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
+            reservation.FromDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
 
             Console.WriteLine();
             Console.WriteLine("What is the departure date? MM/DD/YYYY");
             Console.WriteLine();
 
-            DateTime departureDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
-
-            Reservation reservation = new Reservation();
-            reservation.FromDate = arrivalDate;
-            reservation.ToDate = departureDate;
+            reservation.ToDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
 
             List<Site> sites = CheckSiteAvailability(campgrounds[campgroundChoice - 1].CampgroundId, reservation);
 
-            DisplayAvailableSites(sites, campgrounds[campgroundChoice - 1].DailyFee, reservation);
+            DisplayAvailableSites(sites, reservation, campgrounds[campgroundChoice - 1].DailyFee);
 
-            MakeReservation(sites, reservation);
+            if (!MakeReservation(sites, reservation))
+            {
+                Console.WriteLine();
+                return;
+            }
 
-            Console.WriteLine(AddReservation(reservation));
-            Console.WriteLine();
+            DisplayReservationId(reservation);
+
             Console.WriteLine("Press enter to return to the previous menu.");
             Console.ReadLine();
         }
@@ -90,33 +93,36 @@ namespace Capstone.CLI
             return sites;
         }
 
-        public void DisplayAvailableSites(List<Site> sites, decimal cost, Reservation reservation)
+        public void DisplayAvailableSites(List<Site> sites, Reservation reservation, decimal cost)
         {
             Console.WriteLine();
             Console.WriteLine("Results Matching Your Search Criteria");
             Console.WriteLine();
 
-            Console.WriteLine($"{"Site No.",-10}{"Max Occup.",-15}{"Accessible",-15}" +
+            Console.WriteLine($"      {"Site No.",-10}{"Max Occup.",-15}{"Accessible",-15}" +
                 $"{"Max RV Length",-20}{"Utilities",-15}{"Cost"}");
 
             System.TimeSpan reservationLength = reservation.ToDate - reservation.FromDate;
 
+            int menuOption = 1;
             foreach (Site site in sites)
             {
-                Console.WriteLine($"{site.ToString()}{(cost * reservationLength.Days).ToString("C2")}");
+                Console.WriteLine($"{menuOption})    {site.ToString()}{(cost * reservationLength.Days).ToString("C2")}");
+                menuOption++;
             }
-
 
             Console.WriteLine();
         }
 
-        public void MakeReservation(List<Site> sites, Reservation reservation)
+        public bool MakeReservation(List<Site> sites, Reservation reservation)
         {
+            bool reservationIsSuccessful = false;
+
             int siteChoice = 0;
 
             while (siteChoice < 1 || siteChoice > sites.Count)
             {
-                Console.WriteLine("Which site should be reserved? Enter 0 to cancel");
+                Console.WriteLine("Which site should be reserved? Enter 0 to cancel and return to the previous menu.");
                 Console.WriteLine();
 
                 string input = Console.ReadLine();
@@ -132,7 +138,7 @@ namespace Capstone.CLI
 
                 if (siteChoice == 0)
                 {
-                    return;
+                    return reservationIsSuccessful;
                 }
 
                 if (siteChoice < 0 || siteChoice > sites.Count)
@@ -149,13 +155,18 @@ namespace Capstone.CLI
             Console.WriteLine();
 
             reservation.Name = Console.ReadLine();
+
+            reservationIsSuccessful = true;
+            return reservationIsSuccessful;
         }
 
-        public string AddReservation(Reservation reservation)
+        public void DisplayReservationId(Reservation reservation)
         {
             ReservationSqlDAL reservationSqlDAL = new ReservationSqlDAL(connectionString);
+            int reservationId = reservationSqlDAL.AddReservation(reservation);
 
-            return $"Your reservation has been made and the confirmation id is {reservationSqlDAL.AddReservation(reservation)}";
+            Console.Clear();
+            Console.WriteLine($"Your reservation has been made and the confirmation id is {reservationId}.");
         }
     }
 }

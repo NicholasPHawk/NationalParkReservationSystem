@@ -27,7 +27,7 @@ namespace Capstone.DAL
             this.connectionString = connectionString;
         }
 
-        public List<Site> CheckSiteAvailability(int campgroundChoice, Reservation reservation)
+        public List<Site> CheckSiteAvailability(int campgroundId, Reservation reservation)
         {
             List<Site> availableSites = new List<Site>();
 
@@ -38,7 +38,7 @@ namespace Capstone.DAL
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(SQL_checkSiteAvailability, conn);
-                    cmd.Parameters.AddWithValue("@campground_id", campgroundChoice);
+                    cmd.Parameters.AddWithValue("@campground_id", campgroundId);
                     cmd.Parameters.AddWithValue("@from_date", reservation.FromDate);
                     cmd.Parameters.AddWithValue("@to_date", reservation.ToDate);
 
