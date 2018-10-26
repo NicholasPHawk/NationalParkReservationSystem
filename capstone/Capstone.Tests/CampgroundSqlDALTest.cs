@@ -26,24 +26,24 @@ namespace Capstone.Tests
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                SqlCommand cmd;
                 connection.Open();
+                SqlCommand cmd;
                 cmd = new SqlCommand("INSERT INTO park (name, location, establish_date, area, visitors, description) " +
                                      "VALUES ('Test Park', 'The Place', '10/26/2018', '5000', '450000', 'This is a test park'); " +
                                      "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
                 park.ParkId = (int)cmd.ExecuteScalar();
 
-                cmd.Parameters.AddWithValue("@park_id", park.ParkId);
 
                 cmd = new SqlCommand("INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) " +
                                      "VALUES (@park_id, 'Test Campground', '05', '11', '20.00'); " +
                                      "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
+                cmd.Parameters.AddWithValue("@park_id", park.ParkId);
                 campgroundId = (int)cmd.ExecuteScalar();
 
                 cmd = new SqlCommand(@"SELECT COUNT(*) FROM campground " +
                                      "WHERE park_id = @park_id;" , connection);
+                cmd.Parameters.AddWithValue("@park_id", park.ParkId);
                 campgroundCount = (int)cmd.ExecuteScalar();
-
             }
         }
 
