@@ -7,7 +7,7 @@ namespace Capstone
     {
         public static void Main(string[] args)
         {
-            MainCLI mainCLI = new MainCLI();
+           MainCLI mainCLI = new MainCLI();
             mainCLI.RunMainCLI();
         }
     }

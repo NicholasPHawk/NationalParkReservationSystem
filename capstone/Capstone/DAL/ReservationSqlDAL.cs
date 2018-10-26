@@ -10,7 +10,7 @@ namespace Capstone.DAL
     {
         private string connectionString;
 
-        private string SQL_checkSiteAvailability = "Select * FROM site s " +
+        private string SQL_checkSiteAvailability = "Select TOP 5 * FROM site s " +
                                                    "WHERE s.campground_id = @campground_id " +
                                                    "AND s.site_id NOT IN " +
                                                             "(SELECT site_id from reservation " +
@@ -69,8 +69,6 @@ namespace Capstone.DAL
 
         public int AddReservation(Reservation reservation)
         {
-            int reservationId = 0;
-
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -78,13 +76,13 @@ namespace Capstone.DAL
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(SQL_addReservation, conn);
-                    cmd.Parameters.AddWithValue("@name", reservation.Name);
                     cmd.Parameters.AddWithValue("@site_id", reservation.SiteId);
+                    cmd.Parameters.AddWithValue("@name", reservation.Name);
                     cmd.Parameters.AddWithValue("@from_date", reservation.FromDate);
                     cmd.Parameters.AddWithValue("@to_date", reservation.ToDate);
-                    cmd.Parameters.AddWithValue("@creat_date", DateTime.UtcNow);
+                    cmd.Parameters.AddWithValue("@create_date", DateTime.UtcNow);
 
-                    reservationId = (int)cmd.ExecuteScalar();
+                    reservation.ReservationId = (int)cmd.ExecuteScalar();
                 }
             }
             catch (Exception ex)
@@ -92,7 +90,7 @@ namespace Capstone.DAL
 
             }
 
-            return reservationId;            
+            return reservation.ReservationId;            
         }
     }
 }
