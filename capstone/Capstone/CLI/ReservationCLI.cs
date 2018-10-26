@@ -27,7 +27,7 @@ namespace Capstone.CLI
             {
                 campgroundCLI.DisplayCampgroundInfo(campgrounds);
 
-                Console.WriteLine("Which campground? Enter 0 to cancel");
+                Console.WriteLine("Which campground? Enter 0 to cancel and return to the previous menu.");
                 Console.WriteLine();
 
                 string input = Console.ReadLine();
@@ -57,25 +57,72 @@ namespace Capstone.CLI
 
             Reservation reservation = new Reservation();
 
-            Console.WriteLine();
-            Console.WriteLine("What is the arrival date? MM/DD/YYYY");
-            Console.WriteLine();
+            List<Site> sites = new List<Site>();
 
-            reservation.FromDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
+            while (sites.Count == 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine("What is the arrival date? MM/DD/YYYY");
+                Console.WriteLine();
 
-            Console.WriteLine();
-            Console.WriteLine("What is the departure date? MM/DD/YYYY");
-            Console.WriteLine();
+                reservation.FromDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
 
-            reservation.ToDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
+                Console.WriteLine();
+                Console.WriteLine("What is the departure date? MM/DD/YYYY");
+                Console.WriteLine();
 
-            List<Site> sites = CheckSiteAvailability(campgrounds[campgroundChoice - 1].CampgroundId, reservation);
+                reservation.ToDate = Convert.ToDateTime(Console.ReadLine().Replace('/', '-'));
+
+                sites = CheckSiteAvailability(campgrounds[campgroundChoice - 1].CampgroundId, reservation);
+
+                bool isDone1 = false;
+
+                while (!isDone1)
+                {
+                    if (sites.Count > 0)
+                    {
+                        isDone1 = true;
+                    }
+
+                    else
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("There are no available sites for those dates.");
+                        Console.WriteLine("Would you like to enter alternate dates? Enter (Y)es or (N)o.");
+                        Console.WriteLine();
+
+                        bool isDone2 = false;
+
+                        while (!isDone2)
+                        {
+                            string input = Console.ReadLine();
+
+                            switch (input.ToLower())
+                            {
+                                case "y":
+                                    isDone1 = true;
+                                    isDone2 = true;
+                                    break;
+
+                                case "n":
+                                    Console.Clear();
+                                    return;
+
+                                default:
+                                    Console.WriteLine("Your selection was invalid. Please try again.");
+                                    Console.WriteLine();
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
 
             DisplayAvailableSites(sites, reservation, campgrounds[campgroundChoice - 1].DailyFee);
 
             if (!MakeReservation(sites, reservation))
             {
-                Console.WriteLine();
+                Console.Clear();
                 return;
             }
 

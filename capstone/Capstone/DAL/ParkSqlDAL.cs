@@ -11,7 +11,7 @@ namespace Capstone.DAL
     {
         private string connectionString;
 
-        private string SQL_GetParks = "SELECT * FROM park;";
+        private string SQL_GetParks = "SELECT * FROM park ORDER BY name;";
 
         public ParkSqlDAL(string connectionString)
         {
