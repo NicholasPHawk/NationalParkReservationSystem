@@ -236,16 +236,15 @@ namespace Capstone
             Reservation reservation = new Reservation();
             reservation.FromDate = arrivalDate;
             reservation.ToDate = departureDate;
-
             return reservation;
         }
 
         public List<Site> CheckAvailability(Reservation reservation)
         {
             ReservationSqlDAL reservationSqlDAL = new ReservationSqlDAL(connectionString);
-            List<Site> sites = reservationSqlDAL.   (); // call method to search reservation table           
+           // List<Site> sites = reservationSqlDAL.   (); // call method to search reservation table           
 
-            return sites;
+            return null;
         }
 
         public string MakeReservation(List<Site> sites)
