@@ -15,9 +15,9 @@ namespace Capstone.Tests
 
         const string connectionString = @"Data Source =.\sqlexpress; Initial Catalog = NationalParkReservation; Integrated Security = True";
 
-        private int campgroundId = 0;
-        private int campgroundCount = 0;
         Park park = new Park();
+        private int campgroundCount = 0;
+        private int campgroundId = 0;
 
         [TestInitialize]
         public void Initialize()
@@ -27,23 +27,22 @@ namespace Capstone.Tests
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                SqlCommand cmd;
-                cmd = new SqlCommand("INSERT INTO park (name, location, establish_date, area, visitors, description) " +
+
+                SqlCommand cmd = new SqlCommand("INSERT INTO park (name, location, establish_date, area, visitors, description) " +
                                      "VALUES ('Test Park', 'The Place', '10/26/2018', '5000', '450000', 'This is a test park'); " +
                                      "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
                 park.ParkId = (int)cmd.ExecuteScalar();
 
-
-                cmd = new SqlCommand("INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) " +
-                                     "VALUES (@park_id, 'Test Campground', '05', '11', '20.00'); " +
-                                     "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
-                cmd.Parameters.AddWithValue("@park_id", park.ParkId);
-                campgroundId = (int)cmd.ExecuteScalar();
-
                 cmd = new SqlCommand(@"SELECT COUNT(*) FROM campground " +
-                                     "WHERE park_id = @park_id;" , connection);
+                     "WHERE park_id = @park_id;", connection);
                 cmd.Parameters.AddWithValue("@park_id", park.ParkId);
                 campgroundCount = (int)cmd.ExecuteScalar();
+
+                cmd = new SqlCommand("INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) " +
+                     "VALUES (@park_id, 'Test Campground', '05', '11', '20.00'); " +
+                     "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
+                cmd.Parameters.AddWithValue("@park_id", park.ParkId);
+                campgroundId = (int)cmd.ExecuteScalar();
             }
         }
 
@@ -60,7 +59,8 @@ namespace Capstone.Tests
             List<Campground> campgrounds = campgroundSqlDAL.GetCampgrounds(park);
 
             Assert.IsNotNull(campgrounds);
-            Assert.AreEqual(campgrounds.Count, campgroundCount);
+            Assert.AreEqual(campgroundCount + 1, campgrounds.Count);
+            Assert.AreEqual(campgroundId, campgrounds[0].CampgroundId);
         }
     }
 }

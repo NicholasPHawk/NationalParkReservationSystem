@@ -20,6 +20,7 @@ namespace Capstone.DAL
         public List<Campground> GetCampgrounds(Park park)
         {
             List<Campground> campgrounds = new List<Campground>();
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -48,7 +49,6 @@ namespace Capstone.DAL
             }
             catch (Exception ex)
             {
-
             }
 
             return campgrounds;

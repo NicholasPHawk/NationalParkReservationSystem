@@ -6,7 +6,6 @@ using System;
 using Capstone.Models;
 using Capstone.DAL;
 
-
 namespace Capstone.Tests
 {
     [TestClass]
@@ -16,29 +15,41 @@ namespace Capstone.Tests
 
         const string connectionString = @"Data Source =.\sqlexpress; Initial Catalog = NationalParkReservation; Integrated Security = True";
 
-        private int reservationId = 0;
-        private int reservationCount = 0;
+        private int parkId = 0;
+        private int campgroundId = 0;
+        private int siteId = 0;
 
         [TestInitialize]
         public void Initialize()
         {
             tran = new TransactionScope();
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    SqlCommand cmd;
 
-                    cmd = new SqlCommand("INSERT INTO reservation (site_id, name, from_date, to_date) " +
-                                        "VALUES (29, 'Test Reservation', '10/26/2018', '10/27/2018'); " +
-                                         "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
-                    reservationId = (int)cmd.ExecuteScalar();
-                }
-            }
-            catch(Exception ex)
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
+                connection.Open();
 
+                SqlCommand cmd = new SqlCommand("INSERT INTO park (name, location, establish_date, area, visitors, description) " +
+                     "VALUES ('Test Park', 'The Place', '10/26/2018', '5000', '450000', 'This is a test park'); " +
+                     "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
+                parkId = (int)cmd.ExecuteScalar();
+
+                cmd = new SqlCommand("INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) " +
+                     "VALUES (@park_id, 'Test Campground', '05', '11', '20.00'); " +
+                     "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
+                cmd.Parameters.AddWithValue("@park_id", parkId);
+                campgroundId = (int)cmd.ExecuteScalar();
+
+                cmd = new SqlCommand("INSERT INTO site (campground_id, site_number, max_occupancy, accessible, max_rv_length, utilities)" +
+                    "VALUES (@campground_id, '1', '6', 1, '20', 1);" +
+                    "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
+                cmd.Parameters.AddWithValue("@campground_id", campgroundId);
+                siteId = (int)cmd.ExecuteScalar();
+
+                cmd = new SqlCommand("INSERT INTO reservation (site_id, name, from_date, to_date) " +
+                                    "VALUES (@site_id, 'Test Reservation', '07/01/2018', '07/04/2018'); " +
+                                     "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
+                cmd.Parameters.AddWithValue("@site_id", siteId);
+                cmd.ExecuteNonQuery();
             }
         }
 
@@ -55,41 +66,33 @@ namespace Capstone.Tests
 
             Reservation newReservation = new Reservation();
             newReservation.FromDate = new DateTime(2018, 07, 03);
-            newReservation.ToDate = new DateTime(2018, 07, 09);
+            newReservation.ToDate = new DateTime(2018, 07, 10);
 
-            List<Site> sites = reservationSqlDAL.CheckSiteAvailability(3, newReservation);
+            List<Site> sites = reservationSqlDAL.CheckSiteAvailability(campgroundId, newReservation);
 
-            Assert.IsTrue(sites.Count <= 5);
+            Assert.AreEqual(0, sites.Count);
+
+            newReservation.FromDate = new DateTime(2018, 07, 04);
+
+            sites = reservationSqlDAL.CheckSiteAvailability(campgroundId, newReservation);
+
+            Assert.AreEqual(1, sites.Count);
         }
 
         [TestMethod]
         public void AddReservationTest()
         {
+            ReservationSqlDAL reservationSqlDAL = new ReservationSqlDAL(connectionString);
 
-                ReservationSqlDAL reservationSqlDAL = new ReservationSqlDAL(connectionString);
-                Reservation newReservation = new Reservation();
-                newReservation.SiteId = 30;
-                newReservation.Name = "Jim Jones";
-                newReservation.FromDate = new DateTime(2018, 07, 03);
-                newReservation.ToDate = new DateTime(2018, 07, 10);
-                int result = reservationSqlDAL.AddReservation(newReservation);
-                bool didWork = false;
-            try
-            {
-                if (result > 0)
-                {
-                    didWork = true;
-                }
-                else
-                {
-                    didWork = false;
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-            Assert.IsTrue(didWork);
+            Reservation newReservation = new Reservation();
+            newReservation.SiteId = siteId;
+            newReservation.Name = "Jim Jones";
+            newReservation.FromDate = new DateTime(2018, 07, 04);
+            newReservation.ToDate = new DateTime(2018, 07, 10);
+            
+            int result = reservationSqlDAL.AddReservation(newReservation);
+            
+            Assert.IsTrue(result > 0);
         }
     }
 }

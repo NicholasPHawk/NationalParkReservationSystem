@@ -15,43 +15,38 @@ namespace Capstone.CLI
             ParkSqlDAL parkSqlDAL = new ParkSqlDAL(connectionString);
             List<Park> parks = parkSqlDAL.GetParks();
 
-            bool isDone = false;
+            int parkChoice = 0;
 
-            while (!isDone)
+            while (parkChoice < 1 || parkChoice > parks.Count)
             {
-                int parkChoice = 0;
+                DisplayMainMenu(parks);
 
-                while (parkChoice < 1 || parkChoice > parks.Count)
+                string input = Console.ReadLine();
+
+                if (input.ToLower() == "q")
                 {
-                    DisplayMainMenu(parks);
-
-                    string input = Console.ReadLine();
-
-                    if (input.ToLower() == "q")
-                    {
-                        isDone = true;
-                    }
-
-                    try
-                    {
-                        parkChoice = int.Parse(input);
-                    }
-
-                    catch (Exception ex)
-                    {
-                    }
-
-                    if (parkChoice < 1 || parkChoice > parks.Count)
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Your selection was invalid. Please try again.");
-                        Console.WriteLine();
-                    }
+                    return;
                 }
 
-                ParkCLI parkCLI = new ParkCLI(connectionString);
-                parkCLI.RunParkCLI(parks[parkChoice - 1]);
+                try
+                {
+                    parkChoice = int.Parse(input);
+                }
+
+                catch (Exception ex)
+                {
+                }
+
+                if (parkChoice < 1 || parkChoice > parks.Count)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Your selection was invalid. Please try again.");
+                    Console.WriteLine();
+                }
             }
+
+            ParkCLI parkCLI = new ParkCLI(connectionString);
+            parkCLI.RunParkCLI(parks[parkChoice - 1]);
         }
 
         public void DisplayMainMenu(List<Park> parks)

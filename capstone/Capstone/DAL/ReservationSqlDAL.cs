@@ -38,6 +38,7 @@ namespace Capstone.DAL
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(SQL_checkSiteAvailability, conn);
+
                     cmd.Parameters.AddWithValue("@campground_id", campgroundId);
                     cmd.Parameters.AddWithValue("@from_date", reservation.FromDate);
                     cmd.Parameters.AddWithValue("@to_date", reservation.ToDate);
@@ -61,7 +62,6 @@ namespace Capstone.DAL
             }
             catch (Exception ex)
             {
-
             }
 
             return availableSites;
@@ -76,6 +76,7 @@ namespace Capstone.DAL
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(SQL_addReservation, conn);
+
                     cmd.Parameters.AddWithValue("@site_id", reservation.SiteId);
                     cmd.Parameters.AddWithValue("@name", reservation.Name);
                     cmd.Parameters.AddWithValue("@from_date", reservation.FromDate);
@@ -87,7 +88,6 @@ namespace Capstone.DAL
             }
             catch (Exception ex)
             {
-
             }
 
             return reservation.ReservationId;            

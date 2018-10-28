@@ -21,7 +21,7 @@ namespace Capstone.CLI
 
             CampgroundCLI campgroundCLI = new CampgroundCLI(connectionString);
 
-            int campgroundChoice = 0;
+            int campgroundChoice = -1;
 
             while (campgroundChoice < 1 || campgroundChoice > campgrounds.Count)
             {
@@ -59,7 +59,9 @@ namespace Capstone.CLI
 
             List<Site> sites = new List<Site>();
 
-            while (sites.Count == 0)
+            bool sitesAvailable = false;
+
+            while (!sitesAvailable)
             {
                 Console.WriteLine();
                 Console.WriteLine("What is the arrival date? MM/DD/YYYY");
@@ -75,44 +77,39 @@ namespace Capstone.CLI
 
                 sites = CheckSiteAvailability(campgrounds[campgroundChoice - 1].CampgroundId, reservation);
 
-                bool isDone1 = false;
-
-                while (!isDone1)
+                if (sites.Count > 0)
                 {
-                    if (sites.Count > 0)
+                    sitesAvailable = true;
+                }
+
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("There are no available sites for those dates.");
+                    Console.WriteLine("Would you like to enter alternate dates? Enter (Y)es or (N)o.");
+                    Console.WriteLine();
+
+                    bool checkAlternateDates = false;
+
+                    while (!checkAlternateDates)
                     {
-                        isDone1 = true;
-                    }
+                        string input = Console.ReadLine();
 
-                    else
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("There are no available sites for those dates.");
-                        Console.WriteLine("Would you like to enter alternate dates? Enter (Y)es or (N)o.");
-                        Console.WriteLine();
-
-                        bool isDone2 = false;
-
-                        while (!isDone2)
+                        switch (input.ToLower())
                         {
-                            string input = Console.ReadLine();
+                            case "y":
+                                checkAlternateDates = true;
+                                break;
 
-                            switch (input.ToLower())
-                            {
-                                case "y":
-                                    isDone1 = true;
-                                    isDone2 = true;
-                                    break;
+                            case "n":
+                                Console.Clear();
+                                return;
 
-                                case "n":
-                                    Console.Clear();
-                                    return;
-
-                                default:
-                                    Console.WriteLine("Your selection was invalid. Please try again.");
-                                    Console.WriteLine();
-                                    break;
-                            }
+                            default:
+                                Console.WriteLine();
+                                Console.WriteLine("Your selection was invalid. Please try again.");
+                                Console.WriteLine();
+                                break;
                         }
                     }
                 }
@@ -127,10 +124,8 @@ namespace Capstone.CLI
             }
 
             DisplayReservationId(reservation);
-
-            Console.WriteLine("Press enter to return to the previous menu.");
-            Console.ReadLine();
         }
+
 
         public List<Site> CheckSiteAvailability(int campgroundId, Reservation reservation)
         {
@@ -165,7 +160,7 @@ namespace Capstone.CLI
         {
             bool reservationIsSuccessful = false;
 
-            int siteChoice = 0;
+            int siteChoice = -1;
 
             while (siteChoice < 1 || siteChoice > sites.Count)
             {
@@ -190,6 +185,7 @@ namespace Capstone.CLI
 
                 if (siteChoice < 0 || siteChoice > sites.Count)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Your selection was invalid. Please try again.");
                     Console.WriteLine();
                 }
@@ -210,10 +206,12 @@ namespace Capstone.CLI
         public void DisplayReservationId(Reservation reservation)
         {
             ReservationSqlDAL reservationSqlDAL = new ReservationSqlDAL(connectionString);
-            int reservationId = reservationSqlDAL.AddReservation(reservation);
 
+            Console.WriteLine();
+            Console.WriteLine($"Your reservation has been made and the confirmation id is {reservationSqlDAL.AddReservation(reservation)}.");
+            Console.WriteLine("Press enter to return to the previous menu.");
+            Console.ReadLine();
             Console.Clear();
-            Console.WriteLine($"Your reservation has been made and the confirmation id is {reservationId}.");
         }
     }
 }

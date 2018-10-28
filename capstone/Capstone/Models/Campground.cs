@@ -31,7 +31,7 @@ namespace Capstone.Models
 
         public override string ToString()
         {          
-            return $"{Name, - 40}{months[OpenFrom], - 10}{months[OpenTo], - 10}{DailyFee.ToString("C2")}";
+            return $"{Name, -40}{months[OpenFrom], -10}{months[OpenTo], -10}{DailyFee.ToString("C2")}";
         }
     }
 }

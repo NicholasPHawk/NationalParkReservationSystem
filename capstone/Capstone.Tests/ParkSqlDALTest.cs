@@ -15,8 +15,8 @@ namespace Capstone.Tests
 
         const string connectionString = @"Data Source =.\sqlexpress; Initial Catalog = NationalParkReservation; Integrated Security = True";
 
-        private int parkId = 0;
         private int parkCount = 0;
+        private int parkId = 0;
 
         [TestInitialize]
         public void Initialize()
@@ -25,16 +25,15 @@ namespace Capstone.Tests
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                SqlCommand cmd;
                 connection.Open();
+
+                SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM park;", connection);
+                parkCount = (int)cmd.ExecuteScalar();
 
                 cmd = new SqlCommand("INSERT INTO park (name, location, establish_date, area, visitors, description) " +
                                      "VALUES ('Test Park', 'The Place', '10/26/2018', '5000', '450000', 'This is a test park'); " +
                                      "SELECT CAST(SCOPE_IDENTITY() as int);", connection);
                 parkId = (int)cmd.ExecuteScalar();
-
-                cmd = new SqlCommand("SELECT COUNT(*) FROM park;", connection);
-                parkCount = (int)cmd.ExecuteScalar();
             }
         }
 
@@ -51,7 +50,8 @@ namespace Capstone.Tests
             List<Park> parks = parkSqlDAL.GetParks();
 
             Assert.IsNotNull(parks);
-            Assert.AreEqual(parks.Count, parkCount);
+            Assert.AreEqual(parkCount + 1, parks.Count);
+            Assert.AreEqual(parkId, parks[parks.Count - 1].ParkId);
         }
     }
 }

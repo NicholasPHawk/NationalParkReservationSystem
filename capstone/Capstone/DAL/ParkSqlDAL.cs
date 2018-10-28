@@ -4,7 +4,6 @@ using System.Text;
 using Capstone.Models;
 using System.Data.SqlClient;
 
-
 namespace Capstone.DAL
 {
     public class ParkSqlDAL
@@ -21,6 +20,7 @@ namespace Capstone.DAL
         public List<Park> GetParks()
         {
             List<Park> parks = new List<Park>();
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -48,7 +48,6 @@ namespace Capstone.DAL
             }
             catch (Exception ex)
             {
-
             }
 
             return parks;

@@ -26,8 +26,6 @@ namespace Capstone.CLI
 
             while (!isDone)
             {
-                Console.Clear();
-
                 DisplayParkInfo(park);
                 DisplayParkMenu();
 
